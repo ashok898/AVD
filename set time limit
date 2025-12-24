@@ -1,0 +1,61 @@
+Policy Path Recommended Setting
+- Set time limit for active but idle Remote Desktop Services sessions: Computer Configuration > Admin Templates > Windows Components > Remote Desktop Services > RD Session Host > Session Time Limits (e.g., 15 minutes)
+ 
+- Set time limit for disconnected sessions: Same as above (e.g., 5 minutes)
+- End session when time limits are reached: Same as above (Enabled)
+
+++ Sent IR with in the SLA.
+ 
+issue : we have create AVD pool with 4x VM and each VM allow 12 session. I noticed that if the user simply leaves the Remote Desktop session open, it stays connected indefinitely. I'm wondering if there is Idle time settings to force log off a user after user Idle for one hour
+ 
+provided below solution to the cx:
+ 
+I have thoroughly reviewed your case statement, and I am pleased to inform you that you can indeed configure Idle Timeout settings in Azure Virtual Desktop (AVD) to automatically log off users after a certain period of inactivity. This approach is beneficial for freeing up session capacity and improving resource utilization.
+ 
+Here’s a step-by-step guide to create a Group Policy Object (GPO) that enforces an idle timeout for Remote Desktop sessions in your AVD session host VMs. The goal here is to log off users after 1 hour of inactivity. 
+ 
+Steps to Create the GPO:
+ 
+1. Open Group Policy Management: On your domain controller or management server, open the Group Policy Management Console (GPMC) from Start > Administrative Tools > Group Policy Management.
+   
+2. Create a New GPO: Right-click your Organizational Unit (OU) that contains the AVD session hosts. Select “Create a GPO in this domain, and Link it here…”. Name it something like: AVD - Idle Timeout Policy.
+ 
+3. Edit the GPO: Right-click the new GPO and choose Edit.
+ 
+4. Navigate to Session Time Limits: Go to: Computer Configuration > Administrative Templates > Windows Components > Remote Desktop Services > Remote Desktop Session Host > Session Time Limits.
+ 
+5. Configure Idle Timeout: Double-click "Set time limit for active but idle Remote Desktop Services sessions". Set it to Enabled and set the time limit to 1 hour.
+ 
+6. End Session When Time Limit is Reached: Double-click "End session when time limits are reached". Set it to Enabled.
+ 
+7. (Optional) Configure Other Limits: You can also configure additional settings such as "Set time limit for disconnected sessions" and "Set time limit for active sessions".
+ 
+**Steps to Configure Idle Timeout via Intune:**
+ 
+1. Sign in to Microsoft Intune Admin Center: Go to: [Microsoft Intune Admin Center](https://intune.microsoft.com).
+ 
+2. Create a New Configuration Profile: Navigate to Devices> Configuration profiles and click + Create profile. Choose: Platform: Windows 10 and later, Profile type: Templates > Custom.
+ 
+3. Name the Profile: Give it a name like: AVD Idle Timeout Policy.
+ 
+4. Add OMA-URI Settings: Click Add to create a new custom setting.
+ 
+   - First Setting: Idle Timeout
+     - Name: Idle Timeout
+     - OMA-URI: ./Device/Vendor/MSFT/Policy/Config/RemoteDesktopServices/MaxIdleTime
+     - Data type: Integer
+     - Value: 3600000 (this is 1 hour in milliseconds)
+ 
+   - Second Setting: End Session When Time Limit is Reached
+     - Name: End Session
+     - OMA-URI: ./Device/Vendor/MSFT/Policy/Config/RemoteDesktopServices/EndSessionWhenTimeLimitsReached
+     - Data type: Boolean
+     - Value: true
+ 
+5. Save and Assign the Profile: Click Next, assign the profile to the device group that contains your AVD session hosts, and click Create.
+ 
+Once applied, this policy will ensure that users are automatically logged off after 1 hour of inactivity on Entra-joined AVD session hosts.
+ 
+++Waiting for the cx response.
+ 
+
