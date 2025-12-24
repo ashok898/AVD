@@ -1,0 +1,34 @@
+Symptom:
+The customer is experiencing repeated MFA prompts on Microsoft Entra joined AVD machines when accessing banking websites. This issue does not occur on Domain joined machines.
+Cause:
+The root cause appears to be related to third-party websites, as confirmed by a collaboration engineer. The issue persists despite various troubleshooting steps, indicating that it may not be directly related to the AVD environment itself.
+
+Action plan:
+
+Configuring the registry key:
+ 
+HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\AzureADAccount
+Value Name: LoadCredKeyFromProfile
+Type: REG_DWORD
+Data: 1
+ 
+enables a specific behavior in Azure Virtual Desktop (AVD) or FSLogix environments that use Microsoft Entra ID (formerly Azure AD).
+
+What This Setting Does
+Setting LoadCredKeyFromProfile to 1 allows the system to load the user's credential key from their profile during login. This is particularly useful in non-persistent environments like AVD, where:
+	• User profiles are stored in FSLogix containers (e.g., VHD/VHDX files).
+	• Without this setting, browser cookies, saved passwords, and other credentials may be lost after a reboot or session reset.
+	• Enabling this ensures credential continuity across sessions 
+	
+When to Use It
+	• You're using FSLogix profile containers with Microsoft Entra ID (cloud-only or hybrid).
+	• You want to preserve user credentials (like browser logins) across sessions.
+	• You're deploying Azure Virtual Desktop or similar VDI solutions.
+	
+ Important Notes
+	• This setting does not apply to traditional Active Directory environments.
+	• It may interact with security features like Credential Guard, so test thoroughly in your environment.
+	• Ensure that FSLogix and Entra ID integration is properly configured.
+References
+ 
+https://learn.microsoft.com/en-us/fslogix/how-to-configure-profile-container-entra-id-hybrid
