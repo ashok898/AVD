@@ -1,0 +1,50 @@
+Perfect! Here's a checklist and automation guide to help you enroll existing AVD session hosts into Microsoft Intune, especially if they are Hybrid Azure AD joined.
+
+✅ Checklist for Automating Intune Enrollment (Hybrid Azure AD Joined VMs)
+🔹 Prerequisites
+	• ✅ Windows 10/11 Enterprise multi-session
+	• ✅ Hybrid Azure AD Join configured via Azure AD Connect
+	• ✅ Intune license assigned to users
+	• ✅ Network access to domain controllers
+
+🛠 Automation via Group Policy (Recommended)
+1. Create a Group Policy Object (GPO)
+	• Open Group Policy Management Console on your domain controller.
+	• Create a new GPO and name it something like Intune Enrollment for AVD.
+2. Configure MDM Enrollment Settings
+Navigate to:
+Computer Configuration > Administrative Templates > Windows Components > MDM
+Enable:
+Enable automatic MDM enrollment using default Azure AD credentials
+Set to:
+	• User Credential
+	• Apply and close.
+3. Link GPO to AVD OU
+	• Link the GPO to the Organizational Unit (OU) that contains your AVD session hosts.
+4. Force Group Policy Update (Optional)
+You can run this remotely or via a startup script:
+
+gpupdate /force
+
+
+🧪 Verification Steps
+	• On the AVD session host, go to: Settings > Accounts > Access work or school
+	• Confirm that the device is enrolled in Intune.
+	• Check the Intune Admin Center under: Devices > Windows > All devices
+
+🧰 Optional: PowerShell Script for Manual Trigger
+If you want to trigger enrollment manually or remotely:
+
+$EnrollmentTrigger = New-Object -ComObject Schedule.Service
+$EnrollmentTrigger.Connect()
+$TaskFolder = $EnrollmentTrigger.GetFolder("\Microsoft\Windows\EnterpriseMgmt")
+$TaskFolder.GetTasks(0) | ForEach-Object { $_.Run("") }
+
+
+❌ Azure AD Joined VMs
+For Azure AD joined VMs, you must redeploy with the “Enroll in Intune” option enabled in the Azure portal. There is no supported method to enroll them post-deployment.
+
+Would you like me to generate a downloadable GPO template or PowerShell script for your environment? Or help with redeployment settings in the Azure portal?
+
+From <https://m365.cloud.microsoft/chat/?fromcode=edgentp&redirectid=cc39236c6f234e7b9fb6ed7b9a041f4a&auth=2&handinClickTs=1755694797174&internalredirect=CCM> 
+
